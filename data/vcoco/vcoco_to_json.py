@@ -13,13 +13,20 @@ from data.vcoco_cfg import cfg
 class Convert2Json:
     def __init__(self, const):
         self.const = const
-        self.VCOCO_train = VCOCOeval(const.anno_vcoco_train, const.anno_list_trainval)
-        self.VCOCO_val = VCOCOeval(const.anno_vcoco_val, const.anno_list_trainval)
+        self.VCOCO_train = VCOCOeval(const.anno_vcoco_train, const.anno_list_train)
+        self.VCOCO_val = VCOCOeval(const.anno_vcoco_val, const.anno_list_val)
         self.VCOCO_test = VCOCOeval(const.anno_vcoco_test, const.anno_list_test)
 
     def create_obj_list(self):
         object_list = list()
-        COCO = self.VCOCO_train.COCO
+        categories = self.VCOCO_train.classes
+        for i, ic in enumerate(categories):
+            object_list_item = {
+                'id': i,
+                'name': ic
+            }
+            object_list.append(object_list_item)
+        '''
         category_ids = COCO.getCatIds()
         categories = [c['name'] for c in COCO.loadCats(category_ids)]
         for i, ic in enumerate(category_ids):
@@ -28,7 +35,7 @@ class Convert2Json:
                 'name': categories[i]
             }
             object_list.append(object_list_item)
-
+        '''
         return object_list
 
     def create_hoi_list(self):
@@ -36,7 +43,7 @@ class Convert2Json:
         action_mask = np.array(cfg.VCOCO_ACTION_MASK).T
         has_role = np.where(action_mask == 1)
         hoi_idx = 0
-        for i in range(has_role.shape[1]):
+        for i in range(has_role[0].size):
             hoi_idx = i + 1
             hoi_id = str(hoi_idx).zfill(3)  # 从1开始排序
             hoi_list_item = {
@@ -59,7 +66,7 @@ class Convert2Json:
 
         return hoi_list
 
-    def get_hoi_bboxes(self, subset, entry):
+    def get_hoi_bboxes(self, entry):
         hois = list()
         pos_hoi_ids = []
         neg_hoi_ids = []
@@ -67,7 +74,7 @@ class Convert2Json:
         action_mask = np.array(cfg.VCOCO_ACTION_MASK).T
         has_role = np.where(action_mask == 1)
 
-        for i in range(has_role.shape[1]):   # 利用action_mask寻找每个role作为一个类
+        for i in range(has_role[0].size):   # 利用action_mask寻找每个role作为一个类
             hoi_idx = i + 1
             hoi_id = str(hoi_idx).zfill(3)  # 从1开始排序
             action_i = has_role[0][i]  # 该类对应的action序号和role序号
@@ -155,7 +162,7 @@ class Convert2Json:
                     assert False, 'Image extension is not .jpg'
 
                 image_size = [int(v) for v in [entry['width'], entry['height'], 3]]
-                hois, pos_hoi_ids, neg_hoi_ids = self.get_hoi_bboxes(subset, entry)
+                hois, pos_hoi_ids, neg_hoi_ids = self.get_hoi_bboxes(entry)
                 anno = {
                     'global_id': global_id,
                     'image_path_postfix': f'{image_dir_prefix}/{image_jpg}',

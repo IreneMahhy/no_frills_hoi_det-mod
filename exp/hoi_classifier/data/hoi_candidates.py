@@ -57,9 +57,19 @@ class HoiCandidatesGenerator():
                                              human_rpn_ids[i], object_rpn_ids[j]]
                     count += 1
         else:
-            object_boxes = selected_dets['boxes'][:]
-            object_scores = selected_dets['scores'][:]
-            object_rpn_ids = selected_dets['rpn_ids'][:]
+            object_box_list = []
+            object_score_list = []
+            object_id_list = []
+            for cls_name in COCO_CLASSES:
+                if cls_name == 'person':
+                    continue
+                object_box_list.append(selected_dets['boxes'][cls_name])
+                object_score_list.append(selected_dets['scores'][cls_name])
+                object_id_list.append(selected_dets['rpn_ids'][cls_name])
+            object_boxes = np.concatenate(object_box_list)
+            object_scores = np.concatenate(object_score_list)
+            object_rpn_ids = np.concatenate(object_id_list)
+
             hoi_idx = int(hoi_info['id']) - 1
             if not hoi_info['object']:  # 没有role的动作，候选对即所有的human box
                 num_hoi_dets = human_boxes.shape[0]
@@ -111,9 +121,9 @@ def generate(exp_const, data_const, data_sign):
             'scores': {},
             'rpn_ids': {}
         }
-        start_end_ids = all_selected_dets[global_id]['start_end_ids'].value
+        start_end_ids = all_selected_dets[global_id]['start_end_ids'][()]
         boxes_scores_rpn_ids = \
-            all_selected_dets[global_id]['boxes_scores_rpn_ids'].value
+            all_selected_dets[global_id]['boxes_scores_rpn_ids'][()]
 
         for cls_ind, cls_name in enumerate(COCO_CLASSES):
             start_id, end_id = start_end_ids[cls_ind]

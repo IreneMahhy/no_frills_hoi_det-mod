@@ -7,10 +7,10 @@ def prepare_data(exp_const, data_const):
     io.mkdir_if_not_exists(exp_const.exp_dir)
     
     print('Writing constants to exp dir ...')
-    data_const_json = os.path.join(exp_const.exp_dir,'data_const.json')
+    data_const_json = os.path.join(exp_const.exp_dir, 'data_const.json')
     data_const.to_json(data_const_json)
 
-    exp_const_json = os.path.join(exp_const.exp_dir,'exp_const.json')
+    exp_const_json = os.path.join(exp_const.exp_dir, 'exp_const.json')
     exp_const.to_json(exp_const_json)
 
     print('Loading anno_list.json ...')

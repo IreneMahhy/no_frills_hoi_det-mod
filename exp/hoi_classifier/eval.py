@@ -36,18 +36,19 @@ def eval_model(model, dataset, exp_const, data_sign):
     sampler = SequentialSampler(dataset)
     for sample_id in tqdm(sampler):
         data = dataset[sample_id]
-        
-        feats = {
-            'human_rcnn': Variable(torch.cuda.FloatTensor(data['human_feat']), volatile=True),
-            'object_rcnn': Variable(torch.cuda.FloatTensor(data['object_feat']), volatile=True),
-            'box': Variable(torch.cuda.FloatTensor(data['box_feat']), volatile=True),
-            'absolute_pose': Variable(torch.cuda.FloatTensor(data['absolute_pose']), volatile=True),
-            'relative_pose': Variable(torch.cuda.FloatTensor(data['relative_pose']), volatile=True),
-            'human_prob_vec': Variable(torch.cuda.FloatTensor(data['human_prob_vec']), volatile=True),
-            'object_prob_vec': Variable(torch.cuda.FloatTensor(data['object_prob_vec']), volatile=True),
-            'object_one_hot': Variable(torch.cuda.FloatTensor(data['object_one_hot']), volatile=True),
-            'prob_mask': Variable(torch.cuda.FloatTensor(data['prob_mask']), volatile=True)
-        }        
+
+        with torch.no_grad():
+            feats = {
+                'human_rcnn': Variable(torch.cuda.FloatTensor(data['human_feat'])),
+                'object_rcnn': Variable(torch.cuda.FloatTensor(data['object_feat'])),
+                'box': Variable(torch.cuda.FloatTensor(data['box_feat'])),
+                'absolute_pose': Variable(torch.cuda.FloatTensor(data['absolute_pose'])),
+                'relative_pose': Variable(torch.cuda.FloatTensor(data['relative_pose'])),
+                'human_prob_vec': Variable(torch.cuda.FloatTensor(data['human_prob_vec'])),
+                'object_prob_vec': Variable(torch.cuda.FloatTensor(data['object_prob_vec'])),
+                'object_one_hot': Variable(torch.cuda.FloatTensor(data['object_one_hot'])),
+                'prob_mask': Variable(torch.cuda.FloatTensor(data['prob_mask']))
+            }
 
         prob_vec, factor_scores = model.hoi_classifier(feats)
         
@@ -114,7 +115,7 @@ def main(exp_const, data_const, model_const, data_sign):
     print('Loading model ...')
     model = Model()
     model.const = model_const
-    model.hoi_classifier = HoiClassifier(model.const.hoi_classifier).cuda()
+    model.hoi_classifier = HoiClassifier(model.const.hoi_classifier, data_sign).cuda()
     if model.const.model_num == -1:
         print('No pretrained model will be loaded since model_num is set to -1')
     else:

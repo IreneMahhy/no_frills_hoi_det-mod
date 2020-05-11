@@ -93,7 +93,7 @@ class Features(Dataset):
         self.global_ids = self.load_subset_ids(self.const.subset)
         self.hoi_dict = self.get_hoi_dict(self.const.hoi_list_json)
         self.obj_to_hoi_ids = self.get_obj_to_hoi_ids(self.hoi_dict)
-        # self.obj_to_id = self.get_obj_to_id(self.const.object_list_json)
+        self.obj_to_id = self.get_obj_to_id(self.const.object_list_json)
         self.verb_to_id = self.get_verb_to_id(self.const.verb_list_json)
         self.anno_dict = self.get_anno_dict(self.const.anno_list_json)
         self.obj_to_coco_id = {
@@ -116,12 +116,12 @@ class Features(Dataset):
         hoi_list = io.load_json_object(hoi_list_json)
         hoi_dict = {hoi['id']: hoi for hoi in hoi_list}
         return hoi_dict
-    '''
+
     def get_obj_to_id(self, object_list_json):
         object_list = io.load_json_object(object_list_json)
         obj_to_id = {obj['name']: obj['id'] for obj in object_list}
         return obj_to_id
-    '''
+
     def get_verb_to_id(self, verb_list_json):
         verb_list = io.load_json_object(verb_list_json)
         verb_to_id = {verb['name']: verb['id'] for verb in verb_list}
@@ -253,32 +253,57 @@ class Features(Dataset):
         return obj_prob_vec
 
     def get_unique_pair(self, human_rpn, object_rpn, human_box, object_box):
-        index = list()
-        human_set_list = list(set(list(human_rpn)))
-        object_set_list = list(set(list(object_rpn)))
-        object_set_list.remove(-1)
-        human_set_list.sort(key=human_rpn.index)
-        object_set_list.sort(key=object_rpn.index)
-        for i in human_set_list:
-            for j in object_set_list:
-                for x in human_rpn.shape[0]:
-                    if human_rpn[x] == human_set_list[i] and object_rpn[x] == object_set_list[j]:
-                        index.append(x)
-                        break
-        human_box_list = list(set(list(human_box)))
-        object_box_list = list(set(list(object_box)))
-        object_box_list.remove([0, 0, 0, 0])
-        human_box_list.sort(key=human_box.index)
-        object_box_list.sort(key=object_box.index)
+        human_index = []
+        human_uni_list = []
+        for i in range(human_rpn.size):
+            if human_rpn[i] not in human_uni_list:
+                human_index.append(i)
+                human_uni_list.append(human_rpn[i])
 
-        return np.array(index), np.array(human_box_list), np.array(object_box_list)
+        object_index = []
+        object_uni_list = []
+        for i in range(human_rpn.size):
+            if (object_rpn[i] not in object_uni_list) and (object_rpn[i] != -1):
+                object_index.append(i)
+                object_uni_list.append(object_rpn[i])
+
+        unique_index = []
+        for i in human_uni_list:
+            for j in object_uni_list:
+                for x in range(human_rpn.shape[0]):
+                    if human_rpn[x] == i and object_rpn[x] == j:
+                        unique_index.append(x)
+                        break
+
+        human_box_arr = human_box[np.array(human_index)]
+        object_box_arr = object_box[np.array(object_index)]
+        '''
+        human_box_tuple = list(human_box)
+        for i, box in enumerate(human_box_tuple):
+            human_box_tuple[i] = tuple(box)
+        human_box_list = list(set(human_box_tuple))
+        human_box_list.sort(key=human_box_tuple.index)
+        for i, box in enumerate(human_box_list):
+            human_box_list[i] = np.array(box)
+
+        object_box_tuple = list(object_box)
+        for i, box in enumerate(object_box_tuple):
+            object_box_tuple[i] = tuple(box)
+        object_box_list = list(set(object_box_tuple))
+        if (0, 0, 0, 0) in object_box_list:
+            object_box_list.remove((0, 0, 0, 0))
+        object_box_list.sort(key=object_box_tuple.index)
+        for i, box in enumerate(object_box_list):
+            object_box_list[i] = np.array(box)
+        '''
+        return np.array(unique_index),human_box_arr, object_box_arr
 
     def get_no_role_pair(self, human_rpn, object_rpn):
         index = list()
         human_set = set(list(human_rpn))
         for i in human_set:
-            for x in human_rpn.shape[0]:
-                if human_rpn[x] == human_set[i] and object_rpn[x] == -1:
+            for x in range(human_rpn.shape[0]):
+                if human_rpn[x] == i and object_rpn[x] == -1:
                     index.append(x)
                     break
 
@@ -349,11 +374,13 @@ class Features(Dataset):
             to_return['human_rpn_id'],
             axis=0)
 
-        for i in to_return['object_rpn_id']:
-            if to_return['object_rpn_id'][i] == -1:
-                to_return['object_feat'][i] = np.zeros_like(self.faster_rcnn_feats[global_id][0])
+        obj_feat = []
+        for i, rid in enumerate(to_return['object_rpn_id']):
+            if rid == -1:
+                obj_feat.append(np.zeros_like(self.faster_rcnn_feats[global_id][0]))
             else:
-                to_return['object_feat'][i] = self.faster_rcnn_feats[global_id][to_return['object_rpn_id'][i]]
+                obj_feat.append(self.faster_rcnn_feats[global_id][rid])
+        to_return['object_feat'] = np.array(obj_feat)
         """
         to_return['object_feat'] = np.take(
             self.faster_rcnn_feats[global_id],
@@ -381,7 +408,8 @@ class Features(Dataset):
         to_return['prob_mask'] = self.get_prob_mask(to_return['hoi_idx'])  # 每张图中所有ho pair对所有类别的矩阵，类别存在为1
         # 同一对ho唯一的编号，以及不重复的human_num和object_num
         to_return['unique_index'], to_return['human_boxes'], to_return['object_boxes'] = \
-            self.get_unique_pair(to_return['human_rpn_id'], to_return['object_rpn_id'])
+            self.get_unique_pair(to_return['human_rpn_id'], to_return['object_rpn_id'],
+                                 to_return['human_box'], to_return['object_box'])
         # 每个无object的human pair的唯一编号
         to_return['no_role_index'] = self.get_no_role_pair(to_return['human_rpn_id'], to_return['object_rpn_id'])
         return to_return

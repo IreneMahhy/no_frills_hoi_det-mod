@@ -10,9 +10,9 @@ import utils.pytorch_layers as pytorch_layers
 
 class VerbGivenObjectAppearanceConstants(io.JsonSerializableClass):
     def __init__(self):
-        super(VerbGivenObjectAppearanceConstants,self).__init__()
+        super(VerbGivenObjectAppearanceConstants, self).__init__()
         self.appearance_feat_size = 2048
-        self.num_verbs = 117
+        self.num_verbs = 24+5
 
     @property
     def mlp_const(self):

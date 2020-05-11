@@ -50,7 +50,7 @@ def main():
 
     pred_dets = h5py.File(args.pred_hoi_dets_hdf5, 'r')
 
-    vcoco_const = VcocoConstants
+    vcoco_const = VcocoConstants()
     vcoco_test = VCOCOeval(vcoco_const.anno_vcoco_test, vcoco_const.anno_list_test)
     vcoco_eval = vcoco_test.do_eval(pred_dets)
 '''

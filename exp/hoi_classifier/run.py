@@ -97,7 +97,7 @@ def exp_gen_and_label_hoi_cand_vcoco():
     data_const = VcocoConstants()
     data_const.selected_dets_hdf5 = os.path.join(
         os.getcwd(),
-        'data_symlinks/vcoco_exp/select_confident_boxes_in_hico/' + \
+        'data_symlinks/vcoco_exp/select_confident_boxes_in_vcoco/' + \
         'selected_coco_cls_dets.hdf5')
     _exp_gen_and_label_hoi_cand(exp_const, data_const, 'vcoco')
 

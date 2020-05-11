@@ -12,7 +12,7 @@ class VerbGivenBoxesAndObjectLabelConstants(io.JsonSerializableClass):
         super(VerbGivenBoxesAndObjectLabelConstants, self).__init__()
         self.box_feat_size = 21
         self.num_objects = 80
-        self.num_verbs = 117
+        self.num_verbs = 24+5
         self.use_object_label = True
         self.use_log_feat = True
 

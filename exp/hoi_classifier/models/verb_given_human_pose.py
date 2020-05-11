@@ -14,7 +14,7 @@ class VerbGivenHumanPoseConstants(io.JsonSerializableClass):
         self.use_absolute_pose = True
         self.use_relative_pose = True
         self.num_objects = 80
-        self.num_verbs = 117
+        self.num_verbs = 24+5
         self.use_object_label = True
 
     @property

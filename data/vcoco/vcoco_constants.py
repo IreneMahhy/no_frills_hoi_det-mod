@@ -1,7 +1,9 @@
 import os
 
+import utils.io as io
 
-class VcocoConstants:
+
+class VcocoConstants(io.JsonSerializableClass):
     def __init__(
             self,
             clean_dir=os.path.join(os.getcwd(), 'data_symlinks/vcoco_clean'),
@@ -10,10 +12,12 @@ class VcocoConstants:
         self.proc_dir = proc_dir
 
         # Clean constants
-        self.anno_list_trainval = os.path.join(self.clean_dir, 'vcoco', 'annotations',
-                                                'instances_vcoco_trainval_2014.json')
-        self.anno_list_test = os.path.join(self.clean_dir, 'vcoco', 'annotations',
-                                            'instances_vcoco_test_2014.json')
+        self.anno_list_train = os.path.join(self.clean_dir, 'vcoco', 'annotations_with_keypoints',
+                                                'instances_with_keypoints_vcoco_train_2014.json')
+        self.anno_list_val = os.path.join(self.clean_dir, 'vcoco', 'annotations_with_keypoints',
+                                                'instances_with_keypoints_vcoco_val_2014.json')
+        self.anno_list_test = os.path.join(self.clean_dir, 'vcoco', 'annotations_with_keypoints',
+                                                'instances_with_keypoints_vcoco_test_2014.json')
         self.anno_vcoco_train = os.path.join(self.clean_dir, 'vcoco', 'vcoco',
                                                 'vcoco_train.json')
         self.anno_vcoco_val = os.path.join(self.clean_dir, 'vcoco', 'vcoco',

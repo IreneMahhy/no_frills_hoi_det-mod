@@ -62,10 +62,10 @@ def main(exp_const, data_const):
         human_rpn_ids = boxes_scores_rpn_ids_hoi_idx[:, 10]
         num_cand = human_boxes.shape[0]
 
-        if 'test' in global_id:
-            pose_prefix = 'test/'
+        if 'val' in global_id:
+            pose_prefix = 'val2014/'
         else:
-            pose_prefix = 'train/'
+            pose_prefix = 'train2014/'
         pose_json = os.path.join(
             data_const.human_pose_dir,
             f'{pose_prefix}{global_id}_keypoints.json')

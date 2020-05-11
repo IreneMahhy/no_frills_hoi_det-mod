@@ -8,11 +8,8 @@ PRED_HOI_DETS_HDF5="${VCOCO_EXP_DIR}/${EXP_NAME}/pred_hoi_dets_${SUBSET}_${MODEL
 OUT_DIR="${VCOCO_EXP_DIR}/${EXP_NAME}/mAP_eval/${SUBSET}_${MODEL_NUM}"
 PROC_DIR="${PWD}/data_symlinks/vcoco_processed"
 
-python -m exp.hico_eval.compute_map_vcoco \
+python -m exp.data_eval.compute_map_vcoco \
     --pred_hoi_dets_hdf5 $PRED_HOI_DETS_HDF5 \
     --out_dir $OUT_DIR \
     --proc_dir $PROC_DIR \
     --subset $SUBSET
-
-python -m exp.hico_eval.sample_complexity_analysis \
-    --out_dir $OUT_DIR

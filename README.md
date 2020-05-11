@@ -143,7 +143,7 @@ tools
 # Process HICO-Det files
 The HICO-Det dataset consists of images and annotations stored in the form of .mat and .txt files. Run the following command to quickly convert this data into easy to understand json files which will be written to `hico_processed` directory
 ```
-bash data/hico/process.sh
+bash data/vcoco/process_vcoco.sh
 ```
 In addition, the `process.sh` performs the following functions:
 - It calls `data/hico/split_ids.py` which separates sample ids into train, val, train_val (union of train and val), and test sets.

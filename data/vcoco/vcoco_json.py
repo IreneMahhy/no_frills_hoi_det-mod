@@ -71,7 +71,7 @@ class VCOCOeval(object):
         category_ids = self.COCO.getCatIds()
         categories = [c['name'] for c in self.COCO.loadCats(category_ids)]
         self.category_to_id_map = dict(zip(categories, category_ids))
-        self.classes = ['__background__'] + categories
+        self.classes = ['background'] + categories
         self.num_classes = len(self.classes)
         self.json_category_id_to_contiguous_id = {
             v: i + 1 for i, v in enumerate(self.COCO.getCatIds())}
@@ -80,7 +80,9 @@ class VCOCOeval(object):
 
 
     def _get_vcocodb(self):
-        vcocodb = copy.deepcopy(self.COCO.loadImgs(self.COCO.getImgIds().sort()))
+        image_ids = self.COCO.getImgIds()
+        image_ids.sort()
+        vcocodb = copy.deepcopy(self.COCO.loadImgs(image_ids))
         for entry in vcocodb:
             self._prep_vcocodb_entry(entry)
             self._add_gt_annotations(entry)
@@ -218,7 +220,9 @@ class VCOCOeval(object):
         npos = np.zeros((self.num_actions), dtype=np.float32)
 
         for i in range(len(vcocodb)):
-            image_id = vcocodb[i]['id']
+            image_name = vcocodb[i]['file_name']
+            if image_name.endswith('.jpg'):
+                global_id = image_name[:-4]
             gt_inds = np.where(vcocodb[i]['gt_classes'] == 1)[0]
             # person boxes
             gt_boxes = vcocodb[i]['boxes'][gt_inds]
@@ -231,7 +235,7 @@ class VCOCOeval(object):
             for aid in range(self.num_actions):
                 npos[aid] += np.sum(gt_actions[:, aid] == 1)
 
-            pred_agents, pred_roles = self._collect_detections_for_image(dets, image_id)
+            pred_agents, pred_roles = self._collect_detections_for_image(dets, image_name)
 
             for aid in range(self.num_actions):
                 if len(self.roles[aid]) < 2:

@@ -20,7 +20,7 @@ def split(global_ids, subsets):
             split_ids['train'].append(global_id)
             split_ids['train_val'].append(global_id)
         elif subsets[i] == 'val':
-            split_ids['train'].append(global_id)
+            split_ids['val'].append(global_id)
             split_ids['train_val'].append(global_id)
         else:
             split_ids['test'].append(global_id)

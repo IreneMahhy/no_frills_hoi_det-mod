@@ -57,8 +57,8 @@ def train_model(model, dataset_train, dataset_val, exp_const):
                 optimizer.step()
                 optimizer.zero_grad()
 
-            max_prob = hoi_prob.max().data[0]
-            max_prob_tp = torch.max(hoi_prob*hoi_labels).data[0]
+            max_prob = hoi_prob.max().item()
+            max_prob_tp = torch.max(hoi_prob*hoi_labels).item()
 
             if step % 20 == 0:
                 num_tp = np.sum(data['hoi_label'])
@@ -71,7 +71,7 @@ def train_model(model, dataset_train, dataset_val, exp_const):
                     epoch,
                     i,
                     step,
-                    loss.data[0],
+                    loss.item(),
                     num_tp,
                     num_fp,
                     max_prob_tp,
@@ -79,7 +79,7 @@ def train_model(model, dataset_train, dataset_val, exp_const):
                 print(log_str)
 
             if step % 100 == 0:
-                log_value('train_loss', loss.data[0],step)
+                log_value('train_loss', loss.item(),step)
                 log_value('max_prob', max_prob, step)
                 log_value('max_prob_tp', max_prob_tp, step)
                 print(exp_const.exp_name)
@@ -93,7 +93,7 @@ def train_model(model, dataset_train, dataset_val, exp_const):
                     epoch,
                     i,
                     step,
-                    loss.data[0],
+                    loss.item(),
                     val_loss)
                 print(log_str)
                 
@@ -140,7 +140,7 @@ def eval_model(model, dataset, exp_const, num_samples):
         loss = criterion(hoi_prob, hoi_labels)
 
         batch_size = hoi_prob.size(0)
-        val_loss += (batch_size*loss.data[0])
+        val_loss += (batch_size*loss.item())
         count += batch_size
         step += 1
 

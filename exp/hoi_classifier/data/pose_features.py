@@ -76,7 +76,7 @@ class PoseFeatures():
             x2y2_wrt_keypts,
             keypts_conf), 2)
         relative_pose = np.reshape(relative_pose, (B, -1))
-        for i in B:
+        for i in range(B):
             if np.all(object_bbox[i] == 0):
                 relative_pose[i] = np.zeros_like(relative_pose[i])
         feats = {
